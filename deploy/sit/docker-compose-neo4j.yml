@@ -24,7 +24,7 @@ x-timezone: &timezone Asia/Shanghai
 services:
 
   # 图形数据库
-  #   初始账号密码：neo4j/neo4j
+  #   初始账号密码：neo4j/neo4j   可以由环境变量 NEO4J_AUTH 修改，当前框架默认密码为 KaseiHakuNeo4j
   # Docs:
   #   https://neo4j.com/docs/operations-manual/current/docker/configuration/    # neo4j 配置文件说明
   #   https://neo4j.com/docs/operations-manual/current/docker/ref-settings/     # 通过 环境变量 修改 neo4j 配置
