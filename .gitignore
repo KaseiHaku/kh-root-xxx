@@ -1,0 +1,46 @@
+################################ Universal ################################
+# IDEA 无用运行临时目录
+/.idea/
+/**/*.iml
+
+# 排除掉 telepresence intercept 开发用的环境变量文件
+deploy/dev/.env
+deploy/dev/pvt/
+
+################################ Server ################################
+# 排除掉任何名为 out 的目录，out 为 IDEA 的默认编译输出目录
+/**/out/
+
+# Ignore Gradle build output directory
+/**/build/
+
+# Maven interrelated directory
+/**/target/
+
+# Junit 测试产生的文件
+/**/.attach_pid*
+
+# 临时测试项目
+/demo/demo-flux/src/test/
+/demo/demo-flux/src/main/java/com/kaseihaku/demo/flux/**
+!/demo/demo-flux/src/main/java/com/kaseihaku/demo/flux/DemoFluxBoot.java
+
+/demo/demo-mvc/src/test/
+/demo/demo-mvc/src/main/java/com/kaseihaku/demo/mvc/**
+!/demo/demo-mvc/src/main/java/com/kaseihaku/demo/mvc/DemoMvcBoot.java
+
+
+
+
+
+
+################################ Client ################################
+# 排除掉 package.json, 当前项目使用 package.json5 替代，
+# 但是 package-lock.json 不能排除，会导致不同人下载下来的依赖版本不一样，
+# 由于当前项目都是精确版本号，所以这里可以排除 package-lock.json
+/**/package.json
+/**/package-lock.json
+
+# Node.js Webpack 的输出目录
+/**/node_modules/
+/**/dist/

@@ -1,0 +1,85 @@
+################################ Logging ################################
+# 由于默认情况下 日志输出到文件
+# 所以开发时，可以将 src/main/resources/sample.log4j2-spring.xml 复制一份并重命名为 log4j2-spring.xml
+# 将日志输出到 Console
+#
+debug: true # 开启 boot debug 模式
+logging:
+  level:
+    root: info
+    web: info      # debug 可以看到 filter 的执行顺序和匹配路径等信息
+    # 打印 mybatis 的日志，trace: 打印 statement + result; debug: 只打印 statement
+    #com.xxx.bpm.app.xxx.repo.dao.mapper: debug
+
+################################ Web Sever Config ################################
+server:
+  port: 9200    # 服务启动端口
+  servlet:
+    encoding:
+      enabled: true     # 开启 URL 及 HttpHeader 的转码功能，默认为 ISO-8859-1
+      charset: utf-8    # ISO-8859-1 转为 UTF-8
+      force: true       # 强制对 request 和 response 进行转码
+
+################################ Spring Config ################################
+spring:
+  application:
+    name: bpm-app-xxx  # 服务名称
+  profiles:
+    active: prod   # 使用的配置文件
+  config:
+    import: 'optional:configserver:'                          # 不配置 URL 可以从 consul 中获取
+  cloud:
+    consul:
+      host: sit-cloud-consul.kaseihaku.com
+      port: 80
+#      host: cloud-consul
+      discovery:
+        # 方式一: 本地搭建全套环境
+        prefer-ip-address: true
+
+        # 方式二: 本地只启动当前服务，其他服务使用线上的 sit 环境，
+        # @trap 必须使用 ngrok 进行内网穿透，才能和 线上 sit 环境整合
+        #prefer-ip-address: false
+        #hostname: xxx.ngrok.io
+        #port: 9100
+
+        instance-id: ${spring.application.name}-${random.value}
+        deregister: true
+        health-check-critical-timeout: 4m
+        metadata:
+          bpm-app-name: xxx
+    # config-client 要从 config-server 中获取配置文件，只能使用 bootstrap.yml 不能使用 application.yml
+    config:
+      discovery:
+        enabled: true    # true 表示从 eureka 中获取 config-server 的地址，需要在 bootstrap.yml 中配置 eureka 地址
+      fail-fast: true  # 在找不到配置中心时，快速启动失败
+      # 需要引入 spring-retry 和 spring-boot-starter-aop jar 包
+      retry:
+        max-attempts: 4         # 当连接不上配置中心时，最大尝试次数
+        initial-interval: 1000  # 初始尝试时间间隔，即：首次 和 第二次之间的间隔
+        multiplier: 1.1         # 每次增加的尝试时间间隔是上次的 1.1 倍
+        max-interval: 4000      # 最大尝试时间间隔，即：尝试时间间隔上限
+  datasource:
+    url: jdbc:postgresql://pgsql-primary:5432/bpm
+    username: k8s_rw
+    password: k8s_rw
+  data:
+    redis:
+      cluster: null     # 禁用默认的 cluster 模式
+
+
+################################ Custom Config ################################
+com:
+  kaseihaku:
+    bpm:
+      starter:
+        ppe:
+          mode: dev
+          render:
+            engine:
+              pojo:
+                extra-anno-exclude-prefixes: [ddh]
+
+################################ Mybatis ################################
+# 当前框架 mybatis 默认配置参见 boot-starter-mybatis-1.0.0.jar!com/kaseihaku/boot/starter/mybatis/config/application-mybatis.yml
+#

@@ -1,0 +1,60 @@
+# 默认使用同目录下的 .env 文件作为 环境变量 配置文件，可以通过 shell> docker-compose --env-file /path 来自定义环境变量配置文件
+version: "3.8"    # 表示当前 docker-compose(Compose specification) 的版本，版本 "3.9"  需要 docker 的版本为 19.03.0+
+
+# 扩展字段 YAML Anchor: key 必须是 "x-" 开头
+x-logging: &x-logging
+  # @doc https://docs.docker.com/config/containers/logging/configure/
+  driver: json-file         # 默认 docker 容器日志驱动
+  # @trap options 下所有属性的 value 必须是字符串
+  # @doc https://docs.docker.com/config/containers/logging/json-file/
+  options:
+    max-size: "256m"     # -1 (unlimited), k, m, g; default = -1
+    max-file: "2"       # 必须是字符串，即: 引号包含
+
+# 扩展字段：各镜像版本
+x-neo4j-img: &x-neo4j-img neo4j:5.16.0-community-bullseye
+
+
+# Docker 容器中 时区 配置方式：
+#   1. 通过 TZ=Asia/Shanghai 环境变量指定，只适用于 Debian 和 CentOS 构建的镜像，不适用于基于 Alpine, Ubuntu 构建的镜像
+#   2. shell> ll /etc/localtime 将宿主机 /etc/localtime 挂载到容器相同位置上；该文件是个 /usr/share/zoneinfo 目录下文件的软链接
+#   3. shell> echo "Asia/Shanghai" > /etc/timezone  并挂载到 容器中
+x-timezone: &timezone Asia/Shanghai
+
+services:
+
+  # 图形数据库
+  #   初始账号密码：neo4j/neo4j
+  # Docs:
+  #   https://neo4j.com/docs/operations-manual/current/docker/configuration/    # neo4j 配置文件说明
+  #   https://neo4j.com/docs/operations-manual/current/docker/ref-settings/     # 通过 环境变量 修改 neo4j 配置
+  #   https://neo4j.com/docs/operations-manual/current/docker/maintenance/      # 导入到处 database
+  #   https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin/       # neo4j 管理运维
+  # Operations: 运维
+  #   container> cd /var/lib/neo4j/bin
+  #   container> neo4j-admin server memory-recommendation    # 查看基于当前服务器信息的 推荐配置
+  #   container> neo4j-admin dump/load    # 类似 mysqldump
+  neo4j:
+    image: *x-neo4j-img
+    ports:
+      - 7474:7474     # http://neo4j:neo4j@localhost:7474
+      - 7687:7687     # bolt://neo4j:7687
+    environment:
+      - TZ=CST-08:00:00
+      - LANG=C.UTF-8
+      - LC_ALL=C.UTF-8
+      #- NEO4J_AUTH=neo4j/KaseiHakuNeo4j   # 初次启动时才需要
+      #- NEO4J_server_memory_pagecache_size=512M   # prod 需要
+      #- NEO4J_server_memory_heap_max__size=512M   # prod 需要
+    volumes:
+      - ${BASE_PATH:-.}/neo4j/data:/data:rw
+      - ${BASE_PATH:-.}/neo4j/logs:/logs:rw
+      # 数据库初始化脚本
+      #   container> cypher-shell -u neo4j -p KaseiHakuNeo4j -f /startup/xxx.cypher       # 执行 .cypher 文件
+      - ./neo4j/neo4jInitScriptNode.cypher:/startup/neo4jInitScriptNode.cypher
+      - ./neo4j/neo4jInitScriptRelation.cypher:/startup/neo4jInitScriptRelation.cypher
+    tmpfs:
+      - /var/lib/neo4j/run        # 挂载临时目录，每次容器停止时，自动清空，防止容器崩溃时，neo4j 启不来
+    command: [neo4j, --verbose]
+
+

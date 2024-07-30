@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>com.xxx</groupId>
+    <artifactId>kh-root-xxx</artifactId>
+    <version>1.0.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>xxx-starter</artifactId>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>xxx-starter-basic</module>
+  </modules>
+
+  <dependencies>
+    <!--
+      Spring 自动配置相关的代码,
+      以下文件包含 Spring 提供的所有自动配置类：
+        META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports
+    -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+    </dependency>
+
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <annotationProcessorPaths>
+            <path>
+              <groupId>org.projectlombok</groupId>
+              <artifactId>lombok</artifactId>
+              <version>${org.projectlombok.version}</version>
+            </path>
+            <path>
+              <!--
+                用于生成 META-INF/spring-configuration-metadata.json
+                @doc https://docs.spring.io/spring-boot/docs/3.0.0-M3/reference/html/configuration-metadata.html#appendix.configuration-metadata.annotation-processor
+              -->
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-configuration-processor</artifactId>
+              <version>${spring-boot-dependencies.version}</version>
+            </path>
+            <path>
+              <!-- 用于生成 META-INF/spring-autoconfigure-metadata.properties -->
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-autoconfigure-processor</artifactId>
+              <version>${spring-boot-dependencies.version}</version>
+            </path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <!--
+                如果在 <dependencies> 中直接加入了 <artifactId>spring-boot-autoconfigure-processor</artifactId>，
+                那么需要在该插件中排除，防止该插件的 repackage goal 将 <artifactId>spring-boot-autoconfigure-processor</artifactId> 打进 fat jar 中
+            -->
+            <exclude>
+              <groupId>org.springframework.boot</groupId>
+              <artifactId>spring-boot-autoconfigure-processor</artifactId>
+            </exclude>
+          </excludes>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+
+</project>

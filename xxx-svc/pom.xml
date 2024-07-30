@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>com.xxx</groupId>
+    <artifactId>kh-root-xxx</artifactId>
+    <version>1.0.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>xxx-svc</artifactId>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>bpm-app-one</module><!-- 流程引擎应用 -->
+    <module>bpm-app-xxx</module>
+  </modules>
+
+
+
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+        <version>${spring-boot-maven-plugin.version}</version>
+        <configuration>
+          <image>
+            <name>${com.kh.docker.registry}/${com.kh.project.name}/${project.artifactId}:${project.version}</name>
+            <publish>true</publish><!-- 执行完 build 自动 push -->
+          </image>
+          <docker>
+            <!-- 配置 DockerDaemon 的连接信息，如果本机有 DockerDaemon 则无需配置 -->
+            <!--<host>tcp://localhost:2375</host>-->
+            <!--<tlsVerify>false</tlsVerify>-->
+            <builderRegistry>
+              <url>https://${com.kh.docker.registry}</url><!-- 私有镜像库地址 -->
+              <username>${com.kh.docker.registry.act}</username>
+              <password>${com.kh.docker.registry.pwd}</password>
+            </builderRegistry>
+          </docker>
+        </configuration>
+        <executions>
+          <execution>
+            <id>repackage</id>
+            <goals>
+              <goal>repackage</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
+
+
+
+</project>

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  @doc https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.logging.log4j2-extensions
+  可以在 application.yml 中配置以下两个属性，对当前框架进行自定义：
+    logging.config = log4j2.xml
+    logging.log4j2.config.override = log4j2-override.xml
+-->
+<!-- Log Level
+    ALL         输出所有
+    TRACE       输出 trace 及以下
+    DEBUG       输出 debug 及以下
+    INFO        输出 info 及以下，即输出 info warn error fatal
+    WARN        以下同上
+    ERROR
+    FATAL
+    OFF         不输出任何日志
+-->
+<!-- Configuration
+    monitorInterval=30 表示 log4j2 每隔 30 秒自动重新加载配置文件
+    status="WARN" 表示 log4j2 自身的日志级别，设置成 trace 可以对 log4j2 本身进行 troubleshoot
+    strict="true" 表示当前 xml 使用严格模式
+    verbose="true" 表示 log4j2 加载 plugin 时，输出 diagnostic 信息
+-->
+<Configuration status="WARN" monitorInterval="30" strict="true" verbose="true">
+    <!-- 属性常量配置 -->
+    <Properties>
+        <!--
+            模块相关的属性，在 application.yml 中，必须使用 kebab case，即: my.property-name；否则无效
+            @doc https://logging.apache.org/log4j/2.x/manual/configuration.html#default-properties
+        -->
+        <Property name="moduleName">${spring:spring.application.name:-KhSpringApp}</Property>
+
+        <!-- 模块无关的属性 -->
+        <Property name="logBaseDir">/var/log/${moduleName}</Property>
+        <!--
+            关于 ${date:} 的使用方式参考如下官方文档:
+            https://logging.apache.org/log4j/log4j-2.0/manual/configuration.html#PropertySubstitution
+        -->
+        <Property name="fileName">${logBaseDir}/$${date:yyyy-MM}/$${date:dd}/${moduleName}.log</Property>
+        <Property name="filePattern">${logBaseDir}/$${date:yyyy-MM}/$${date:dd}/${moduleName}-%d{yyyy-MM-dd-HH}-%i.log.zip</Property>
+        <Property name="dateFormat">yyyy-MM-dd HH:mm:ss.SSS</Property>
+        <!--官方文档：https://logging.apache.org/log4j/log4j-2.0/manual/layouts.html#PatternLayout-->
+        <Property name="logPatternSample">
+            <!-- Info 直接根据程序环境进行替换的 -->
+            %-40.50logger{1.} <!-- logger 最前面的 minus 符号表示左对齐，40 表示最小 40 字符的宽度, 50 表示如果超过 50 那么修剪头部 -->
+            %40.-50class{1.} <!-- class 右对齐，最小 40，超过 50 修剪尾部 -->
+            %date{${dateFormat}} <!-- date -->
+            %throwable{"full"}{filters(package1, ...)}{suffix(%msg)}{separator(\n)} <!-- 输出异常信息 -->
+            %rThrowable{full, filter(package1,...), separator()}{ansi(k1=v1,v2,k2=v1,v2)}{suffix(%msg)} <!-- rException rThrowable  -->
+            %xThrowable{full, filter(package1,...), separator()}{ansi(k1=v1,v2,k2=v1,v2)}{suffix(%msg)} <!-- xException xThrowable  -->
+            %file <!-- 输出日志记录点的文件名 -->
+            %map{key} <!-- 当遇到 map 类型的消息时，输出指定的 key，如果不配置输出所有 key，格式为 {{key1,val1},{key2,val2}} -->
+            %location <!-- 打印日志来源信息，一般包括全方法名和方法所在文件的行号，该配置影响性能，谨慎使用 -->
+            %line <!-- 行号，该配置影响性能，谨慎使用 -->
+            %msg <!-- message 输出传入的消息 -->
+            %method <!-- 打印日志产生的方法名，该配置影响性能，谨慎使用 -->
+            %marker <!-- marker 的全名，包括父 marker -->
+            %markerSimpleName <!-- marker 的短名，不包括父 marker -->
+            %n <!-- 输出平台依赖的行分隔符 \n 或 \r\n -->
+            %nano <!-- 输出 System.nanoTime() -->
+            %pid{defaultValue} <!-- processId 输出当前进程号，如果平台不支持，则使用 defaultValue 替换 -->
+            %level <!-- 输出日志级别 -->
+            %relative <!-- 输出 jvm 启动到当前日志的时间间隔 -->
+            %sequenceNumber <!-- 输出当前日志的序列号 -->
+            %tid <!-- threadId 线程 id -->
+            %tn <!-- threadName 线程名 -->
+            %tp <!-- threadPriority 线程优先级 -->
+            %fqcn <!-- fully qualified class name -->
+            %mdc{key1, ...} <!-- 输出 Thread Context Map(Mapped Diagnostic Context) 信息，如果单个 key 则直接显示 value, 若多个 key，这显示 {k=v, k=v} -->
+            %uuid <!-- 输出 uuid -->
+            %% <!-- 输出 % -->
+            <!-- Decorate 用于修饰打印格式的 -->
+            %enc{%msg}{CRLF} <!-- 表示对 %msg 中内容的指定特殊字符进行转义 -->
+            %equalsIgnoreCase{%msg}{test}{substitution} <!-- 将 %msg 内容中符合 test 的部分替换成 substitution 中的内容 -->
+            %replace{%msg}{regex}{substitution} <!-- 将 %msg 内容中符合 regex 的部分替换成 substitution 中的内容 -->
+            %highlight{%msg}{style} <!-- 表示高亮 %msg 的内容 -->
+            %style{%msg}{bright,green} <!-- %msg 的输出样式 -->
+            %maxLength{%msg}{160} <!-- 表示 %msg 的最大长度为 160 个字符，超过使用省略号 -->
+            %varsNotEmpty{%msg} <!-- 表示 %msg 中所有变量都不为空是输出 -->
+            <!-- Other Extension -->
+            %xwEx <!-- spring boot 扩展的 log4j2 的转换器 -->
+        </Property>
+        <Property name="consoleLogPattern">
+            %clr{%date{${dateFormat}}}{faint} %clr{%5level} %clr{%pid{PID}}{magenta} %clr{[%tn,%mdc{traceId},%mdc{spanId}]}{faint} %clr{%-40.40logger{1.}}{cyan} %clr{:}{faint} %m%n%xwEx
+        </Property>
+        <Property name="fileLogPattern">
+            %date{${dateFormat}} %5level %pid{PID} [%tn,%mdc{traceId},%mdc{spanId}] %-40.40logger{1.} : %m%n%xwEx
+        </Property>
+    </Properties>
+
+    <!--记录器 -->
+    <Appenders>
+        <!-- type="RollingFile" 表示记录器类型，不同的类型有不同的参数
+            append="true" 表示在原文件中追加而不是覆盖
+        -->
+        <Appender name="RollingFile" type="RollingFile" append="true">
+            <Layout type="PatternLayout" ><Pattern>${fileLogPattern}</Pattern></Layout>
+            <fileName>${fileName}</fileName>
+            <!--
+                归档(archived) 的 log 文件格式
+                @attention 当归档文件中 同时存在 date/time 和 %i 时，每次归档前判断 date/time 是否改变
+                           是，date/time 改变，%i 重置
+                           否，date/time 不变，%i 加 1
+            -->
+            <filePattern>${filePattern}</filePattern>
+
+            <!--
+                日志文件辗转策略：任何一个 policy 触发，都会造成日志文件辗转(归档)，辗转的意思是: 归档当前日志文件，新的日志记录到新的文件中去
+            -->
+            <Policies>
+                <!--
+                    schedule="Seconds Minutes Hours DayOfMonth Month DayOfWeek Year"
+                    @param evaluateOnStartup 当服务重启时，如果 cron 表达式在上次关闭 和 当前时间 之间会被触发，
+                                             那么重启的日志直接记录到新的文件中去
+                -->
+                <CronTriggeringPolicy schedule="* * 0/4 * * ? *" evaluateOnStartup="true" />
+                <!-- 当一个 .log 文件超过 250 MB 时，新的日志记录到新的文件中去 -->
+                <SizeBasedTriggeringPolicy size="250 MB" />
+                <!-- TimeBasedTriggeringPolicy
+                    interval="4" 表示每隔 4 个时间单位，滚动升级一次，时间单位由 date pattern 决定
+                    modulate="true" 表示调整 rollover 时间点，例如系统启动时间是 03:20, 那么调整下次 rollover 时间为 04:00, false 的话为 07:20
+                    maxRandomDelay="8" 表示 rollover 最大延时时间，为了分散多个 application 同时 rollover 对服务器的压力
+                <TimeBasedTriggeringPolicy interval="4" modulate="true" maxRandomDelay="8"/>
+                -->
+            </Policies>
+
+            <!-- DefaultRolloverStrategy
+                fileIndex="nomax" 表示没有最大值
+                min="1" 表示 index 从 1 开始
+                compressionLevel="9" 当压缩格式为 zip 时，0=不压缩，仅打包 1=速度优先 9=压缩比优先
+            -->
+            <DefaultRolloverStrategy fileIndex="nomax" min="1" compressionLevel="9" >
+                <!-- Delete
+                    basePath= 表示文件匹配的基本目录
+                    maxDepth="2" 表示最多深入 basePath 下两级子目录
+                -->
+                <Delete basePath="${logBaseDir}" maxDepth="2">
+                    <IfFileName glob="**/*.log.zip" /><!-- 匹配符合条件的文件 -->
+                    <IfLastModified age="2d" /><!-- 超过 2 day 的文件 -->
+                </Delete>
+            </DefaultRolloverStrategy>
+        </Appender>
+        <!-- type="Console" 表示记录器类型，不同的类型有不同的参数
+            target="SYSTEM_OUT" 表示输出到标准输出，SYSTEM_ERR 输出到标准错误输出
+            follow="true" 表示允许程序重新设置 SYSTEM_OUT
+        -->
+        <Appender name="Console" type="Console" target="SYSTEM_OUT" follow="true">
+            <Layout type="PatternLayout"><Pattern>${consoleLogPattern}</Pattern></Layout>
+        </Appender>
+    </Appenders>
+
+    <!-- 日志实例 -->
+    <Loggers>
+        <!--
+          Logger
+            name: logger 的 FQCN 或者 package 前缀; 不支持通配符(? * **)
+            additivity=false: 表示当日志已经被其他 Logger 匹配时，即使当前 Logger 也匹配，但是不再次记录日志，生产中必须使用 false
+          @trap 每个 Logger 必须配置一个 appender，如果没有配置，那么不会打印任何日志
+          @tips 即使当前文件存在，application.yml 中 logging.level.<loggerFqcn>: info 的配置照样有效
+        -->
+        <Logger name="com.kaseihaku" level="info" additivity="false">
+          <AppenderRef ref="RollingFile" />
+          <AppenderRef ref="Console" />
+        </Logger>
+        <!--
+            用于打印 mybatis 的日志，trace: 打印 statement + result; debug: 只打印 statement
+        -->
+        <!-- <Logger name="com.kaseihaku.bpm.app.one.repo.dao.mapper" level="debug" additivity="false"> -->
+        <!--     <AppenderRef ref="Console" /> -->
+        <!-- </Logger> -->
+
+        <!-- 当上述 <Logger> 配置，没有符合当前的 Logger 时，默认使用该 Logger 打印日志 -->
+        <Root level="info">
+            <!-- 表示当前日志实例使用 <Appenders/> 下面的 <Console/> 或者 <Appender name="Console"> 记录器，记录日志 -->
+            <AppenderRef ref="Console" />
+        </Root>
+    </Loggers>
+
+
+</Configuration>

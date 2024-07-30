@@ -1,0 +1,115 @@
+# 默认使用同目录下的 .env 文件作为 环境变量 配置文件，可以通过 shell> docker-compose --env-file /path 来自定义环境变量配置文件
+version: "3.8"    # 表示当前 docker-compose(Compose specification) 的版本，版本 "3.9"  需要 docker 的版本为 19.03.0+
+
+# 扩展字段 YAML Anchor: key 必须是 "x-" 开头
+x-logging: &x-logging
+  # @doc https://docs.docker.com/config/containers/logging/configure/
+  driver: json-file         # 默认 docker 容器日志驱动
+  # @trap options 下所有属性的 value 必须是字符串
+  # @doc https://docs.docker.com/config/containers/logging/json-file/
+  options:
+    max-size: "256m"     # -1 (unlimited), k, m, g; default = -1
+    max-file: "2"       # 必须是字符串，即: 引号包含
+
+# 扩展字段：各镜像版本
+# openjdk 的镜像只能用到 java17,
+# 要使用之后的版本，例如 java21 可以使用镜像 [eclipse-temurin, amazoncorretto] 替代 openjdk
+x-jdk-img: &x-jdk-img openjdk:17-oraclelinux8
+
+
+# 扩展字段：统一配置
+x-environment: &x-environment
+  TZ: GMT-08:00:00
+# JDK 命令文档: https://docs.oracle.com/en/java/javase/17/docs/specs/man/index.html
+# -XX:ErrorFile=filename
+x-command: &x-command
+  - java
+  #- -XX:ErrorFile=./hs_err_pid%p.log               # JVM 遇到无法恢复的错误时，导出的日志文件，默认为: ./hs_err_pid<pid>.log
+  - -XX:+HeapDumpOnOutOfMemoryError                 # 在 OOM 时导出 heap，
+  - -XX:HeapDumpPath=/var/log/java_pid%p.hprof      # 默认为: ./java_pid<pid>.hprof
+  - --add-opens=java.base/java.lang=ALL-UNNAMED
+  - -jar
+  - '/opt/app.jar'
+x-command-debug: &x-command-debug
+  - java
+  - -XX:+HeapDumpOnOutOfMemoryError
+  - -XX:HeapDumpPath=/var/log/java_pid%p.hprof
+  - -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+  - --add-opens=java.base/java.lang=ALL-UNNAMED
+  - -jar
+  - '/opt/app.jar'
+# 以下命令 容器的工作目录必须配置为 /opt, 即: working_dir: /opt
+x-command-agent: &x-command-agent
+  - bash
+  - -vxc
+  - >-
+    jar -xf /opt/core-infra-agent.jar
+    &&
+    java
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:HeapDumpPath=/var/log/java_pid%p.hprof
+    --add-opens=java.base/java.lang=ALL-UNNAMED
+    -javaagent:/opt/core-infra-agent.jar=decrypt,neo4j
+    -Xbootclasspath/a:`ls -d /opt/agentlib/* | sed ':a;N;$!ba;s/\n/:/g'`
+    -jar
+    /opt/app.jar
+x-command-agent-debug: &x-command-agent-debug
+  - bash
+  - -vxc
+  - >-
+    jar -xf /opt/core-infra-agent.jar
+    &&
+    java
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:HeapDumpPath=/var/log/java_pid%p.hprof
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    --add-opens=java.base/java.lang=ALL-UNNAMED
+    -javaagent:/opt/core-infra-agent.jar=decrypt,neo4j
+    -Xbootclasspath/a:`ls -d /opt/agentlib/* | sed ':a;N;$!ba;s/\n/:/g'`
+    -jar
+    /opt/app.jar
+
+x-extra-hosts: &x-extra-hosts
+  # 因为 dev 环境，app 和 redis 在同一个 docker 网络下，可以直接通过 container name 访问，所以无需通过 host 配置 dns 解析
+  #- 'cloud-consul:192.168.0.200'
+  #- 'redis-a:192.168.0.200'
+  #- 'redis-b:192.168.0.200'
+  #- 'redis-c:192.168.0.200'
+  #- 'redis-a1:192.168.0.200'
+  #- 'redis-b1:192.168.0.200'
+  #- 'redis-c1:192.168.0.200'
+  #- 'sp-pgsql:192.168.0.200'
+  #- 'pgsql-primary:192.168.0.200'
+  #- 'pgsql-s0:192.168.0.200'
+  #- 'pgsql-s01:192.168.0.200'
+  #- 'neo4j:192.168.0.200'
+  #- 'zipkin:192.168.0.200'
+  #- 'as.kaseihaku.com:192.168.0.200'
+  - 'example.kaseihaku.com:127.0.0.1'
+
+x-deploy-resources-min: &x-deploy-resources-min
+  limits:
+    memory: 256M
+x-deploy-resources-mid: &x-deploy-resources-mid
+  limits:
+    memory: 512M
+x-deploy-resources-max: &x-deploy-resources-max
+  limits:
+    memory: 1024M
+
+services:
+
+  bpm-app-one:
+    image: *x-jdk-img
+    environment:
+      <<: *x-environment
+    ports: [ 9100:9100, 5008:5005 ]
+    volumes:
+      - ./core/core-infra/target/core-infra-${KH_PROJECT_VERSION:?err}-agent.jar:/opt/core-infra-agent.jar
+      - ./xxx-svc/bpm-app-one/target/bpm-app-one-${KH_PROJECT_VERSION:?err}.jar:/opt/app.jar
+      - ${BASE_PATH:-.}/log:/var/log
+    working_dir: /opt
+    extra_hosts: *x-extra-hosts
+    command: *x-command-agent-debug
+
+

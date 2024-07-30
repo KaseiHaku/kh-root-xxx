@@ -1,0 +1,163 @@
+# 默认使用同目录下的 .env 文件作为 环境变量 配置文件，可以通过 shell> docker-compose --env-file /path 来自定义环境变量配置文件
+version: "3.8"    # 表示当前 docker-compose(Compose specification) 的版本，版本 "3.9"  需要 docker 的版本为 19.03.0+
+
+# 扩展字段 YAML Anchor: key 必须是 "x-" 开头
+x-logging: &x-logging
+  # @doc https://docs.docker.com/config/containers/logging/configure/
+  driver: json-file         # 默认 docker 容器日志驱动
+  # @trap options 下所有属性的 value 必须是字符串
+  # @doc https://docs.docker.com/config/containers/logging/json-file/
+  options:
+    max-size: "256m"     # -1 (unlimited), k, m, g; default = -1
+    max-file: "2"       # 必须是字符串，即: 引号包含
+
+# 扩展字段：各镜像版本
+# openjdk 的镜像只能用到 java17,
+# 要使用之后的版本，例如 java21 可以使用镜像 [eclipse-temurin, amazoncorretto] 替代 openjdk
+x-jdk-img: &x-jdk-img openjdk:17-oraclelinux8
+x-ngrok-img: &x-ngrok-img ngrok/ngrok:3.13.0-debian
+
+
+# 扩展字段：统一配置
+x-environment: &x-environment
+  TZ: GMT-08:00:00
+# JDK 命令文档: https://docs.oracle.com/en/java/javase/17/docs/specs/man/index.html
+# -XX:ErrorFile=filename
+x-command: &x-command
+  - java
+  #- -XX:ErrorFile=./hs_err_pid%p.log               # JVM 遇到无法恢复的错误时，导出的日志文件，默认为: ./hs_err_pid<pid>.log
+  - -XX:+HeapDumpOnOutOfMemoryError                 # 在 OOM 时导出 heap，
+  - -XX:HeapDumpPath=/var/log/java_pid%p.hprof      # 默认为: ./java_pid<pid>.hprof
+  - --add-opens=java.base/java.lang=ALL-UNNAMED
+  - -jar
+  - '/opt/app.jar'
+x-command-debug: &x-command-debug
+  - java
+  - -XX:+HeapDumpOnOutOfMemoryError
+  - -XX:HeapDumpPath=/var/log/java_pid%p.hprof
+  - -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+  - --add-opens=java.base/java.lang=ALL-UNNAMED
+  - -jar
+  - '/opt/app.jar'
+# 以下命令 容器的工作目录必须配置为 /opt, 即: working_dir: /opt
+x-command-agent: &x-command-agent
+  - bash
+  - -vxc
+  - >-
+    jar -xf /opt/core-infra-agent.jar
+    &&
+    java
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:HeapDumpPath=/var/log/java_pid%p.hprof
+    --add-opens=java.base/java.lang=ALL-UNNAMED
+    -javaagent:/opt/core-infra-agent.jar=decrypt,neo4j
+    -Xbootclasspath/a:`ls -d /opt/agentlib/* | sed ':a;N;$!ba;s/\n/:/g'`
+    -jar
+    /opt/app.jar
+x-command-agent-debug: &x-command-agent-debug
+  - bash
+  - -vxc
+  - >-
+    jar -xf /opt/core-infra-agent.jar
+    &&
+    java
+    -XX:+HeapDumpOnOutOfMemoryError
+    -XX:HeapDumpPath=/var/log/java_pid%p.hprof
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    --add-opens=java.base/java.lang=ALL-UNNAMED
+    -javaagent:/opt/core-infra-agent.jar=decrypt,neo4j
+    -Xbootclasspath/a:`ls -d /opt/agentlib/* | sed ':a;N;$!ba;s/\n/:/g'`
+    -jar
+    /opt/app.jar
+
+x-extra-hosts: &x-extra-hosts
+  # 因为 dev 环境，app 和 redis 在同一个 docker 网络下，可以直接通过 container name 访问，所以无需通过 host 配置 dns 解析
+  - 'redis-a:192.168.0.200'
+  - 'redis-b:192.168.0.200'
+  - 'redis-c:192.168.0.200'
+  - 'redis-a1:192.168.0.200'
+  - 'redis-b1:192.168.0.200'
+  - 'redis-c1:192.168.0.200'
+  - 'redis:192.168.0.200'                     # 修改为 ../sit/docker-compose-redis.yml 的实际部署地址
+  - 'pgsql-primary:192.168.0.200'             # 修改为 ../sit/docker-compose-pgsql.yml 的实际部署地址
+  - 'neo4j:192.168.0.200'                     # 修改为 ../sit/docker-compose-neo4j.yml 的实际部署地址
+  - 'zipkin:192.168.0.201'                    # 可以部署，Console 中会有错误但可忽略，生产环境自行部署 zipkin
+  # - 'as.kaseihaku.com:192.168.0.200'
+  - 'example.kaseihaku.com=127.0.0.1'
+
+x-deploy-resources-min: &x-deploy-resources-min
+  limits:
+    memory: 256M
+x-deploy-resources-mid: &x-deploy-resources-mid
+  limits:
+    memory: 512M
+x-deploy-resources-max: &x-deploy-resources-max
+  limits:
+    memory: 1024M
+
+services:
+
+  # 运行该 灰度服务 需要将 kh-root-xxx-client/webpack.config.babel.js 文件中  x-kasei-gray-req-flag 所在行放出来
+  # shell> docker run --net=host -it -e NGROK_AUTHTOKEN=3KAgkCDsQAwGdBgEoMpif_tN4CS93t3duCWoXB3vEp ngrok/ngrok:3.13.0-debian http 9100
+  bpm-app-one:
+    image: *x-jdk-img
+    environment:
+      <<: *x-environment
+      SPRING_CLOUD_CONSUL_HOST: sit-cloud-consul.kaseihaku.com
+      SPRING_CLOUD_CONSUL_PORT: 80
+      SPRING_CLOUD_CONSUL_DISCOVERY_PREFERIPADDRESS: false
+      SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: 1490-2408-8240-9416-8741-00-1001.ngrok-free.app    # 替换这里
+      SPRING_CLOUD_CONSUL_DISCOVERY_PORT: 443
+      SPRING_CLOUD_CONSUL_DISCOVERY_SCHEME: https
+      SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKINTERVAL: 2m
+      SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTLSSKIPVERIFY: true
+      # 灰度服务开启配置;
+      # @tips 其中 Canary 可以替换为其他值，但是要和 kh-root-xxx-client/webpack.config.babel.js 文件中  x-kasei-gray-req-flag 值中的 Canary 保持一致
+      SPRING_APPLICATION_JSON: '{"spring.cloud.consul.discovery.metadata.serviceGrayNames":"Canary"}'
+    ports: [ 9100:9100, 5030:5005 ]
+    network_mode: host        # 导致 ports 映射失效，配置中保留 ports 配置是为了方便查看当前服务的端口
+    volumes:
+      - ../../core/core-infra/target/core-infra-${KH_PROJECT_VERSION:?err}-agent.jar:/opt/core-infra-agent.jar  # 该包从 maven 仓库中获取
+      - ../../xxx-svc/bpm-app-one/target/bpm-app-one-${KH_PROJECT_VERSION:?err}.jar:/opt/app.jar
+      - ${BASE_PATH:-.}/log:/var/log
+    working_dir: /opt
+    extra_hosts: *x-extra-hosts
+    command: *x-command-agent-debug
+
+
+  # 启动 ngrok 进行内网穿透:
+  #   - 注册(Sign up) ngrok 账号: https://ngrok.com/
+  #   - 登录(Log in)并进入 https://dashboard.ngrok.com/get-started/your-authtoken 获取 authtoken
+  #   - 启动 ngrok：
+  #     # 替换以下命令中 NGROK_AUTHTOKEN 为自己的，
+  #     # @trap 注意 ngrok 不能使用 docker compose 启动，否则看不到输出
+  #     shell> docker run --net=host -it -e NGROK_AUTHTOKEN=3KAgkCDsQAwGdBgEoMpif_tN4CS93t3duCWoXB3vEp ngrok/ngrok:3.13.0-debian http 9200
+  #   - 复制控制台中输出的 Forwarding 字段的 https 部分，例如: https://8248-101-66-137-143.ngrok-free.app -> http://localhost:9200
+  #   - 替换 docker-compose 中的环境变量 SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME 为 8248-101-66-137-143.ngrok-free.app
+  #
+  # @巨神坑: host 模式只在 linux 主机下有效，对 Docker Desktop(Mac or Windows) 都无效
+  #         该场景下，请直接下载并安装对应平台的 ngrok 安装包
+  bpm-app-xxx:
+    image: *x-jdk-img
+    environment:
+      <<: *x-environment
+      SPRING_CLOUD_CONSUL_HOST: sit-cloud-consul.kaseihaku.com
+      SPRING_CLOUD_CONSUL_PORT: 80
+      SPRING_CLOUD_CONSUL_DISCOVERY_PREFERIPADDRESS: false
+      SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: f847-101-66-137-143.ngrok-free.app    # 替换这里
+      SPRING_CLOUD_CONSUL_DISCOVERY_PORT: 443
+      SPRING_CLOUD_CONSUL_DISCOVERY_SCHEME: https
+      SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKINTERVAL: 1m
+      SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTLSSKIPVERIFY: true
+    ports: [ 9200:9200, 5031:5005 ]
+    network_mode: host      # 导致 ports 映射失效，配置中保留 ports 配置是为了方便查看当前服务的端口
+    volumes:
+      - ../../core/core-infra/target/core-infra-${KH_PROJECT_VERSION:?err}-agent.jar:/opt/core-infra-agent.jar  # 该包从 maven 仓库中获取
+      - ../../xxx-svc/bpm-app-xxx/target/bpm-app-xxx-${KH_PROJECT_VERSION:?err}.jar:/opt/app.jar
+      - ${BASE_PATH:-.}/log:/var/log
+    working_dir: /opt
+    extra_hosts: *x-extra-hosts
+    command: *x-command-agent-debug
+
+
+

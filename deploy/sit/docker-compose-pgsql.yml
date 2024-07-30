@@ -1,0 +1,42 @@
+# 默认使用同目录下的 .env 文件作为 环境变量 配置文件，可以通过 shell> docker-compose --env-file /path 来自定义环境变量配置文件
+version: "3.8"    # 表示当前 docker-compose(Compose specification) 的版本，版本 "3.9"  需要 docker 的版本为 19.03.0+
+
+# 扩展字段：各镜像版本
+x-pgsql-img: &x-pgsql-img postgres:16.1-bullseye
+
+
+# Docker 容器中 时区 配置方式：
+#   1. 通过 TZ=Asia/Shanghai 环境变量指定，只适用于 Debian 和 CentOS 构建的镜像，不适用于基于 Alpine, Ubuntu 构建的镜像
+#   2. shell> ll /etc/localtime 将宿主机 /etc/localtime 挂载到容器相同位置上；该文件是个 /usr/share/zoneinfo 目录下文件的软链接
+#   3. shell> echo "Asia/Shanghai" > /etc/timezone  并挂载到 容器中
+x-timezone: &timezone Asia/Shanghai
+
+# pgsql 集群方案对比： https://www.postgresql.org/docs/current/different-replication-solutions.html
+services:
+
+  pgsql-primary:
+    image: *x-pgsql-img
+    environment: &x-pgsql-env
+      POSTGRES_PASSWORD: passwd
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres             # 首次启动时自动创建的数据库，不配置默认和 $POSTGRES_USER 值相同
+      # 配置 shell> initdb args;  相关的参数
+      # https://www.postgresql.org/docs/current/app-initdb.html
+      # --data-checksums              使用 校验和 来检测 I/O 导致的数据问题
+      POSTGRES_INITDB_ARGS: '--data-checksums --wal-segsize=16'
+    ports: [5432:5432]
+    volumes:
+      # 首次启动时，按文件名排序，自动执行该目录下以下文件 *.sql, *.sql.gz, *.sh
+      - ./pgsql/primary/initdb.d:/docker-entrypoint-initdb.d
+      # 配置文件样例：container> cat /usr/share/postgresql/postgresql.conf.sample
+      - ./pgsql/primary/postgresql.conf:/usr/share/postgresql/postgresql.conf:ro    # 容器内同目录下有 postgresql.conf.sample
+      #- ./pgsql/primary/conf.d:/usr/share/postgresql/conf.d:ro
+
+      - ./pgsql/primary/pg_hba.conf:/usr/share/postgresql/pg_hba.conf:ro    # hba = host based authentication;
+      - ${BASE_PATH:-.}/pgsql/primary/data:/var/lib/postgresql/data
+    shm_size: 64m           # shared memory 的大小
+    command: [postgres, -c, config_file=/usr/share/postgresql/postgresql.conf]
+
+
+
+

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <groupId>com.xxx</groupId>
+    <artifactId>xxx-svc</artifactId>
+    <version>1.0.0</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <modelVersion>4.0.0</modelVersion>
+
+    <!--
+    @trap PPE 应用 spring.application.name 必须以 bpm-app- 开头，这里最好保持一致
+  -->
+  <artifactId>bpm-app-xxx</artifactId>
+
+  <dependencies>
+
+    <dependency>
+      <groupId>com.kaseihaku</groupId>
+      <artifactId>cloud-starter-mvc</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.kaseihaku</groupId>
+      <artifactId>cloud-starter-mybatis</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>com.kaseihaku</groupId>
+      <artifactId>bpm-starter-ppe</artifactId>
+    </dependency>
+
+
+    <dependency>
+      <groupId>org.postgresql</groupId>
+      <artifactId>postgresql</artifactId>
+    </dependency>
+
+
+
+  </dependencies>
+
+  <!-- 构建配置 -->
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <inherited>false</inherited>
+        <configuration>
+          <annotationProcessorPaths>
+            <path><groupId>org.projectlombok</groupId><artifactId>lombok</artifactId><version>${org.projectlombok.version}</version></path>
+            <path><groupId>com.kaseihaku</groupId><artifactId>bpm-starter-ppe</artifactId><version>${project.version}</version></path>
+          </annotationProcessorPaths>
+        </configuration>
+      </plugin>
+
+    </plugins>
+  </build>
+
+
+
+</project>
