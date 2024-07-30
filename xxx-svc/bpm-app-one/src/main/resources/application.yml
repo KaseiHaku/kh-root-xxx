@@ -63,6 +63,15 @@ spring:
     url: jdbc:postgresql://pgsql-primary:5432/bpm
     username: k8s_rw
     password: k8s_rw
+  # 框架默认 redis 是 cluster 模式，开发环境可以设置为 standalone 模式
+  # @trap standalone 模式需要把 com.kaseihaku.bpm.app.one.BpmAppOneBoot 中 RedisPropertySourceAutoConfiguration 行放出来
+  data:
+    redis:
+      # 仅 single 需要
+      host: redis
+      port: 6379
+      # single 和 cluster 都要的配置
+      password: foobared
 
 ################################ Custom Config ################################
 com:

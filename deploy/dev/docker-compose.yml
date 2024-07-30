@@ -16,6 +16,8 @@ x-logging: &x-logging
 # 要使用之后的版本，例如 java21 可以使用镜像 [eclipse-temurin, amazoncorretto] 替代 openjdk
 x-jdk-img: &x-jdk-img openjdk:17-oraclelinux8
 x-ngrok-img: &x-ngrok-img ngrok/ngrok:3.13.0-debian
+x-redis-img: &x-redis-img redis:7.2.4-bookworm              # redis 7.4 版本开始，开源协议变更，慎用
+
 
 
 # 扩展字段：统一配置
@@ -72,18 +74,19 @@ x-command-agent-debug: &x-command-agent-debug
 
 x-extra-hosts: &x-extra-hosts
   # 因为 dev 环境，app 和 redis 在同一个 docker 网络下，可以直接通过 container name 访问，所以无需通过 host 配置 dns 解析
-  - 'redis-a:192.168.0.200'
-  - 'redis-b:192.168.0.200'
-  - 'redis-c:192.168.0.200'
-  - 'redis-a1:192.168.0.200'
-  - 'redis-b1:192.168.0.200'
-  - 'redis-c1:192.168.0.200'
-  - 'redis:192.168.0.200'                     # 修改为 ../sit/docker-compose-redis.yml 的实际部署地址
+  - 'example.kaseihaku.com:127.0.0.1'
+  # 框架默认 redis 是 cluster 模式，开发环境可以设置为 single 模式
+  #- 'redis-a:192.168.0.200'
+  #- 'redis-b:192.168.0.200'
+  #- 'redis-c:192.168.0.200'
+  #- 'redis-a1:192.168.0.200'
+  #- 'redis-b1:192.168.0.200'
+  #- 'redis-c1:192.168.0.200'
+  - 'redis:192.168.0.106'                     # 修改为 ../sit/docker-compose-redis.yml 的实际部署地址
   - 'pgsql-primary:192.168.0.200'             # 修改为 ../sit/docker-compose-pgsql.yml 的实际部署地址
   - 'neo4j:192.168.0.200'                     # 修改为 ../sit/docker-compose-neo4j.yml 的实际部署地址
   - 'zipkin:192.168.0.201'                    # 可以部署，Console 中会有错误但可忽略，生产环境自行部署 zipkin
   # - 'as.kaseihaku.com:192.168.0.200'
-  - 'example.kaseihaku.com=127.0.0.1'
 
 x-deploy-resources-min: &x-deploy-resources-min
   limits:
