@@ -83,9 +83,9 @@ x-extra-hosts: &x-extra-hosts
   #- 'redis-b1:192.168.0.200'
   #- 'redis-c1:192.168.0.200'
   - 'redis:192.168.0.106'                     # 修改为 ../sit/docker-compose-redis.yml 的实际部署地址
-  - 'pgsql-primary:192.168.0.200'             # 修改为 ../sit/docker-compose-pgsql.yml 的实际部署地址
   - 'neo4j:192.168.0.200'                     # 修改为 ../sit/docker-compose-neo4j.yml 的实际部署地址
-  - 'zipkin:192.168.0.201'                    # 可以部署，Console 中会有错误但可忽略，生产环境自行部署 zipkin
+  - 'pgsql-primary:192.168.0.200'             # 修改为 ../sit/docker-compose-pgsql.yml 的实际部署地址
+  - 'zipkin:192.168.0.201'                    # 可以部署，不部署 Console 中会有错误日志但可忽略，生产环境自行部署 zipkin
   # - 'as.kaseihaku.com:192.168.0.200'
 
 x-deploy-resources-min: &x-deploy-resources-min
