@@ -27,12 +27,10 @@ spring:
   profiles:
     active: prod   # 使用的配置文件
   config:
-    import: 'optional:configserver:'                          # 不配置 URL 可以从 consul 中获取
+    import: 'optional:configserver:'
   cloud:
     consul:
-      host: sit-cloud-consul.kaseihaku.com
-      port: 80
-#      host: cloud-consul
+      host: cloud-consul
       discovery:
         # 方式一: 本地搭建全套环境
         prefer-ip-address: true
@@ -47,6 +45,8 @@ spring:
         deregister: true
         health-check-critical-timeout: 4m
         metadata:
+          # @tips 多个值 , 分隔
+          #serviceGrayNames: Canary
           bpm-app-name: xxx
     # config-client 要从 config-server 中获取配置文件，只能使用 bootstrap.yml 不能使用 application.yml
     config:
@@ -63,10 +63,15 @@ spring:
     url: jdbc:postgresql://pgsql-primary:5432/bpm
     username: k8s_rw
     password: k8s_rw
+  # 框架默认 redis 是 cluster 模式，开发环境可以设置为 standalone 模式
+  # @trap standalone 模式需要把 com.kaseihaku.bpm.app.one.BpmAppOneBoot 中 RedisPropertySourceAutoConfiguration 行放出来
   data:
     redis:
-      cluster: null     # 禁用默认的 cluster 模式
-
+      # 仅 single 需要
+      host: redis
+      port: 6379
+      # single 和 cluster 都要的配置
+      password: foobared
 
 ################################ Custom Config ################################
 com:
