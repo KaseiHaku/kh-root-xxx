@@ -1,0 +1,8 @@
+### 本地请求测试
+#GET {{baseUrl}}/v1/Test
+GET http://localhost:9200/v1/Test
+
+### 通过 cloud-gateway 请求测试
+GET https://bpm.kaseihaku.com/api/bpm-app-xxx/v1/Test
+#GET http://192.168.0.200:8999/bpm-app-xxx/v1/Test
+

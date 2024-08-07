@@ -1,1 +1,1 @@
-用于存放 ./target/core-infra-agent.jar 包
+用于存放 ./target/core-infra-x.y.z-agent.jar 包

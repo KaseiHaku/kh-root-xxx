@@ -84,7 +84,7 @@ x-extra-hosts: &x-extra-hosts
   #- 'redis-c1:192.168.0.200'
   - 'redis:192.168.0.106'                     # 修改为 ../sit/docker-compose-redis.yml 的实际部署地址
   - 'neo4j:192.168.0.200'                     # 修改为 ../sit/docker-compose-neo4j.yml 的实际部署地址
-  - 'pgsql-primary:192.168.0.200'             # 可选部署，修改为 ../sit/docker-compose-pgsql.yml 的实际部署地址
+  - 'pgsql-primary:192.168.0.200'             # 修改为 ../sit/docker-compose-pgsql.yml 的实际部署地址
   - 'zipkin:192.168.0.201'                    # 可选部署，不部署 Console 中会有错误日志但可忽略，生产环境自行部署 zipkin
   # - 'as.kaseihaku.com:192.168.0.200'
 
@@ -113,6 +113,7 @@ services:
       SPRING_CLOUD_CONSUL_DISCOVERY_PORT: 443
       SPRING_CLOUD_CONSUL_DISCOVERY_SCHEME: https
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKINTERVAL: 2m
+      SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTIMEOUT: 32s
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTLSSKIPVERIFY: true
       # 灰度服务开启配置;
       # @tips 其中 Canary 可以替换为其他值，但是要和 kh-root-xxx-client/webpack.config.babel.js 文件中  x-kasei-gray-req-flag 值中的 Canary 保持一致
@@ -151,6 +152,7 @@ services:
       SPRING_CLOUD_CONSUL_DISCOVERY_PORT: 443
       SPRING_CLOUD_CONSUL_DISCOVERY_SCHEME: https
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKINTERVAL: 1m
+      SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTIMEOUT: 32s
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTLSSKIPVERIFY: true
     ports: [ 9200:9200, 5031:5005 ]
     network_mode: host      # 导致 ports 映射失效，配置中保留 ports 配置是为了方便查看当前服务的端口

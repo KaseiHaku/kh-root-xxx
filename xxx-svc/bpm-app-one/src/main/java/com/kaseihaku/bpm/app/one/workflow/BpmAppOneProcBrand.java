@@ -9,6 +9,5 @@ public class BpmAppOneProcBrand extends ProcBrandConst {
         super(key);
     }
 
-    public static final BpmAppOneProcBrand sample = new BpmAppOneProcBrand("sample");
     public static final BpmAppOneProcBrand feature = new BpmAppOneProcBrand("feature");
 }
