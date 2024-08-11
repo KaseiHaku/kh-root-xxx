@@ -32,6 +32,23 @@
     <dependencies>
       <!--**************************** 自定义模块，用于依赖聚合 ****************************************-->
       <dependency><groupId>com.xxx</groupId><artifactId>xxx-starter-basic</artifactId><version>${project.version}</version></dependency>
+
+      <!--**************************** 三方模块: kh-root 未管理的依赖 ****************************************-->
+
+      <!--**************************** 三方模块: kh-root 已管理，但需要覆盖的依赖 ****************************************-->
+      <dependency>
+        <groupId>org.springdoc</groupId>
+        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        <version>2.6.0</version>
+      </dependency>
+      <!--**************************** 三方模块: 由 kh-root 进行版本管理的依赖 ****************************************-->
+      <!-- <dependency> -->
+      <!--   <groupId>com.kaseihaku</groupId> -->
+      <!--   <artifactId>kh-root</artifactId> -->
+      <!--   <version>1.0.0</version> -->
+      <!--   <type>pom</type> -->
+      <!--   <scope>import</scope> -->
+      <!-- </dependency> -->
     </dependencies>
   </dependencyManagement>
 

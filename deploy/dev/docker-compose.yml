@@ -75,6 +75,7 @@ x-command-agent-debug: &x-command-agent-debug
 x-extra-hosts: &x-extra-hosts
   # 因为 dev 环境，app 和 redis 在同一个 docker 网络下，可以直接通过 container name 访问，所以无需通过 host 配置 dns 解析
   - 'example.kaseihaku.com:127.0.0.1'
+  - 'cloud-consul=192.168.0.200'
   # 框架默认 redis 是 cluster 模式，开发环境可以设置为 single 模式
   #- 'redis-a:192.168.0.200'
   #- 'redis-b:192.168.0.200'
@@ -148,7 +149,7 @@ services:
       SPRING_CLOUD_CONSUL_HOST: sit-cloud-consul.kaseihaku.com
       SPRING_CLOUD_CONSUL_PORT: 80
       SPRING_CLOUD_CONSUL_DISCOVERY_PREFERIPADDRESS: false
-      SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: f847-101-66-137-143.ngrok-free.app    # 替换这里
+      SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: 70db-123-157-180-136.ngrok-free.app    # 替换这里
       SPRING_CLOUD_CONSUL_DISCOVERY_PORT: 443
       SPRING_CLOUD_CONSUL_DISCOVERY_SCHEME: https
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKINTERVAL: 1m

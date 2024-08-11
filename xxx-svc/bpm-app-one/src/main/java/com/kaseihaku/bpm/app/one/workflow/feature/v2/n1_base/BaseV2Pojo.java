@@ -16,6 +16,7 @@ import java.util.Set;
 /**
  * 添加该注解，会在启动时，对当前 POJO 进行预解析，提高前端渲染速度
  * @tips 废弃/历史 流程的 POJO 可以删除，减小缓存占用
+ * @tips 打了该注解的 pojo 修改后，需要删除 redis 中对应的缓存才能生效
  * */
 @PpeAotResolve
 /**

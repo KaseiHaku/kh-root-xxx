@@ -10,7 +10,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-    <!--
+  <!--
     @trap PPE 应用 spring.application.name 必须以 bpm-app- 开头，这里最好保持一致
   -->
   <artifactId>bpm-app-xxx</artifactId>

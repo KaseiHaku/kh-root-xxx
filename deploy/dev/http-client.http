@@ -2,7 +2,15 @@
 #GET {{baseUrl}}/v1/Test
 GET http://localhost:9200/v1/Test
 
+### 本地请求测试
+#GET {{baseUrl}}/v1/Test
+GET http://localhost:9200/v3/api-docs
+#GET http://192.168.0.106:9200/v3/api-docs
+
 ### 通过 cloud-gateway 请求测试
-GET https://bpm.kaseihaku.com/api/bpm-app-xxx/v1/Test
-#GET http://192.168.0.200:8999/bpm-app-xxx/v1/Test
+#GET https://bpm.kaseihaku.com/api/bpm-app-xxx/v1/Test
+GET http://192.168.0.200:8999/bpm-app-xxx/v1/Test
+Authorization: {{token}}
+x-kh-ts: {{$timestamp}}000
+x-kh-nonce: {{$uuid}}
 

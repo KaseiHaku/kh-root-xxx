@@ -9,7 +9,7 @@ logging:
     root: info
     web: info      # debug 可以看到 filter 的执行顺序和匹配路径等信息
     # 打印 mybatis 的日志，trace: 打印 statement + result; debug: 只打印 statement
-    #com.xxx.bpm.app.xxx.repo.dao.mapper: debug
+#    com.kaseihaku.bpm.app.one.repo.dao.mapper: debug
 
 ################################ Web Sever Config ################################
 server:
@@ -23,7 +23,7 @@ server:
 ################################ Spring Config ################################
 spring:
   application:
-    name: bpm-app-xxx  # 服务名称
+    name: bpm-app-xxx  # 服务名称格式: bpm-app-???
   profiles:
     active: prod   # 使用的配置文件
   config:
@@ -47,7 +47,7 @@ spring:
         metadata:
           # @tips 多个值 , 分隔
           #serviceGrayNames: Canary
-          bpm-app-name: xxx
+          bpm-app-name: 视频演示
     # config-client 要从 config-server 中获取配置文件，只能使用 bootstrap.yml 不能使用 application.yml
     config:
       discovery:
