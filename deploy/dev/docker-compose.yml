@@ -147,7 +147,7 @@ services:
     environment:
       <<: *x-environment
       SPRING_CLOUD_CONSUL_HOST: sit-cloud-consul.kaseihaku.com
-      SPRING_CLOUD_CONSUL_PORT: 80
+      SPRING_CLOUD_CONSUL_PORT: 50080         # 已更新，教学视频中为 80
       SPRING_CLOUD_CONSUL_DISCOVERY_PREFERIPADDRESS: false
       SPRING_CLOUD_CONSUL_DISCOVERY_HOSTNAME: 70db-123-157-180-136.ngrok-free.app    # 替换这里
       SPRING_CLOUD_CONSUL_DISCOVERY_PORT: 443
