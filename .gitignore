@@ -1,11 +1,17 @@
 ################################ Universal ################################
 # IDEA 无用运行临时目录
-/.idea/
+/.idea/*
+!.idea/scopes/
 /**/*.iml
+
+# 排除掉所有 临时/私有 目录
+/**/pvt/
+/**/tmp/
+/**/temp/
 
 # 排除掉 telepresence intercept 开发用的环境变量文件
 deploy/dev/.env
-deploy/dev/pvt/
+deploy/dev/k8s.env
 
 ################################ Server ################################
 # 排除掉任何名为 out 的目录，out 为 IDEA 的默认编译输出目录
@@ -28,7 +34,6 @@ deploy/dev/pvt/
 /demo/demo-mvc/src/test/
 /demo/demo-mvc/src/main/java/com/kaseihaku/demo/mvc/**
 !/demo/demo-mvc/src/main/java/com/kaseihaku/demo/mvc/DemoMvcBoot.java
-
 
 
 
