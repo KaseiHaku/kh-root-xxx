@@ -14,7 +14,7 @@ x-logging: &x-logging
 # 扩展字段：各镜像版本
 # openjdk 的镜像只能用到 java17,
 # 要使用之后的版本，例如 java21 可以使用镜像 [eclipse-temurin, amazoncorretto] 替代 openjdk
-x-jdk-img: &x-jdk-img openjdk:17-oraclelinux8
+x-jdk-img: &x-jdk-img eclipse-temurin:21.0.4_7-jdk-noble
 x-ngrok-img: &x-ngrok-img ngrok/ngrok:3.13.0-debian
 x-redis-img: &x-redis-img redis:7.2.4-bookworm              # redis 7.4 版本开始，开源协议变更，慎用
 
