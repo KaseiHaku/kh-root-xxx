@@ -155,6 +155,9 @@ services:
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKINTERVAL: 1m
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTIMEOUT: 32s
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTLSSKIPVERIFY: true
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pgsql-primary:5432/bpm      # 数据库连接 JDBC-URL
+      SPRING_DATASOURCE_USERNAME: k8s_rw                                   # 数据库连接 用户名
+      SPRING_DATASOURCE_PASSWORD: k8s_rw                                   # 数据库连接 密码
     ports: [ 9200:9200, 5031:5005 ]
     network_mode: host      # 导致 ports 映射失效，配置中保留 ports 配置是为了方便查看当前服务的端口
     volumes:
