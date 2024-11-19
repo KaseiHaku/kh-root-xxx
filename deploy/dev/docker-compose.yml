@@ -101,7 +101,7 @@ x-deploy-resources-max: &x-deploy-resources-max
 
 services:
 
-  # 运行该 灰度服务 需要将 kh-root-xxx-client/webpack.config.babel.js 文件中  x-kasei-gray-req-flag 所在行放出来
+  # 运行该 灰度服务 需要将 kh-root-xxx-client/webpack.config.babel.js 文件中  x-kh-gray-req-flag 所在行放出来
   # shell> docker run --net=host -it -e NGROK_AUTHTOKEN=3KAgkCDsQAwGdBgEoMpif_tN4CS93t3duCWoXB3vEp ngrok/ngrok:3.13.0-debian http 9100
   bpm-app-one:
     image: *x-jdk-img
@@ -117,7 +117,7 @@ services:
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTIMEOUT: 32s
       SPRING_CLOUD_CONSUL_DISCOVERY_HEALTHCHECKTLSSKIPVERIFY: true
       # 灰度服务开启配置;
-      # @tips 其中 Canary 可以替换为其他值，但是要和 kh-root-xxx-client/webpack.config.babel.js 文件中  x-kasei-gray-req-flag 值中的 Canary 保持一致
+      # @tips 其中 Canary 可以替换为其他值，但是要和 kh-root-xxx-client/webpack.config.babel.js 文件中  x-kh-gray-req-flag 值中的 Canary 保持一致
       SPRING_APPLICATION_JSON: '{"spring.cloud.consul.discovery.metadata.serviceGrayNames":"Canary"}'
     ports: [ 9100:9100, 5030:5005 ]
     network_mode: host        # 导致 ports 映射失效，配置中保留 ports 配置是为了方便查看当前服务的端口
