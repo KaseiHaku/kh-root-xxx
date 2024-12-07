@@ -1,7 +1,7 @@
 package com.kaseihaku.bpm.app.one.ctrl;
 
 import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureDto;
-import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureQryDto;
+import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureQry;
 import com.kaseihaku.bpm.app.one.svc.FeatureReadSvc;
 import com.kaseihaku.bpm.app.one.svc.FeatureWriteSvc;
 import com.kaseihaku.core.infra.constant.cls.DeletedFlagConstant;
@@ -44,7 +44,7 @@ public class FeatureCtrl {
 
 
     @PutMapping("")
-    public List<FeatureDto> put(@RequestBody Paged<FeatureQryDto> qryDto) {
+    public List<FeatureDto> put(@RequestBody Paged<FeatureQry> qryDto) {
         List<FeatureDto> query = readSvc.query(qryDto);
         return query;
     }

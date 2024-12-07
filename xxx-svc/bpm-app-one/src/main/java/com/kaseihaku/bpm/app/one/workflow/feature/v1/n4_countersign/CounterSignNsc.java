@@ -1,7 +1,7 @@
 package com.kaseihaku.bpm.app.one.workflow.feature.v1.n4_countersign;
 
 import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureDto;
-import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureQryDto;
+import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureQry;
 import com.kaseihaku.bpm.app.one.svc.FeatureReadSvc;
 import com.kaseihaku.bpm.app.one.svc.FeatureWriteSvc;
 import com.kaseihaku.bpm.app.one.workflow.feature.FeatureNodeBrand;
@@ -44,7 +44,7 @@ public class CounterSignNsc extends RatioDoneNextStepCalculator<CounterSignPojo>
         Integer allowCount = dto.getCurPojoFqcnIns().getAllowCount();
 
         log.info("会签结束后，合并所有 允许的数量入 关系型数据库(例如: MySQL, PostgreSQL); 并设置 待办，使流程下行");
-        FeatureQryDto qryDto = new FeatureQryDto();
+        FeatureQry qryDto = new FeatureQry();
         qryDto.setProcId(curProcId);
         FeatureDto featureDto = featureReadSvc.queryOne(qryDto).orElseGet(() -> {
             FeatureDto createDto = new FeatureDto();

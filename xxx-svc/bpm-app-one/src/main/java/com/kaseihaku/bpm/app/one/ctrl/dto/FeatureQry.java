@@ -1,10 +1,10 @@
 package com.kaseihaku.bpm.app.one.ctrl.dto;
 
-import com.kaseihaku.core.infra.pojo.BaseQueryDto;
+import com.kaseihaku.core.infra.pojo.BaseQry;
 import lombok.Data;
 
 @Data
-public class FeatureQryDto extends BaseQueryDto {
+public class FeatureQry extends BaseQry {
 
     private Long procId;
     private Integer countSignTotal;

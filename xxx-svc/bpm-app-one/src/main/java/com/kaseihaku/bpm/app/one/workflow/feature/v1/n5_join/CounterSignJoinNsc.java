@@ -74,7 +74,7 @@ public class CounterSignJoinNsc implements NextStepCalculator<CounterSignJoinPoj
         // 执行合并
         PpeToDoDto newToDo = new PpeToDoDto();
         newToDo.setNextNodeMetaBrand(FeatureNodeBrand.V1.overrule);
-        newToDo.setNextApproverHgid(CloudImmutableConst.PreBuryGroup.Homonym_0);
+        newToDo.setNextApproverHgid(CloudImmutableConst.PreBuryGroup.Homonym_0_root);
 
         List<PpeToDoDto> newToDos = ppe.nodeMerge(dto.getCurProcIns().getId(), Set.of(curNodeId, anotherNode.getId()),
             List.of(newToDo));

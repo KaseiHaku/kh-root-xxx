@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.kaseihaku.boot.starter.jwt.jws.JwsAccessor;
 import com.kaseihaku.boot.starter.mybatis.plus.PlusPage;
-import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureQryDto;
+import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureQry;
 import com.kaseihaku.cloud.starter.mybatis.pkg.arch.MpAbstractBaseDao;
 import com.kaseihaku.bpm.app.one.repo.dao.mapper.FeatureMapper;
 import com.kaseihaku.cloud.starter.feign.client.mvc.cloud.id.SnowFlakeIdFeign;
@@ -17,7 +17,7 @@ import java.util.Objects;
 
 
 @Repository
-class FeatureDaoImpl extends MpAbstractBaseDao<FeaturePo, FeatureQryDto, FeatureMapper> implements FeatureDao {
+class FeatureDaoImpl extends MpAbstractBaseDao<FeaturePo, FeatureQry, FeatureMapper> implements FeatureDao {
 
     public FeatureDaoImpl(SnowFlakeIdFeign cloudIdFeign, JwsAccessor jwsAccessor, FeatureMapper mapper) {
         super(cloudIdFeign, jwsAccessor, mapper);
@@ -30,9 +30,9 @@ class FeatureDaoImpl extends MpAbstractBaseDao<FeaturePo, FeatureQryDto, Feature
     }
 
     @Override
-    public List<FeaturePo> query(Paged<FeatureQryDto> qryDto) {
+    public List<FeaturePo> query(Paged<FeatureQry> qryDto) {
 
-        FeatureQryDto param = qryDto.getParam();
+        FeatureQry param = qryDto.getParam();
 
 
         IPage<FeaturePo> page = PlusPage.of(qryDto);
