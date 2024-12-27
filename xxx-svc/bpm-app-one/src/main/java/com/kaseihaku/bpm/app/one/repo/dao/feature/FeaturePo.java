@@ -1,7 +1,7 @@
 package com.kaseihaku.bpm.app.one.repo.dao.feature;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.kaseihaku.boot.starter.mybatis.typehandler.ClassConstantTypeHandler;
+import com.kaseihaku.boot.starter.mybatis.typehandler.ClassConstantBaseTypeHandler;
 import com.kaseihaku.boot.starter.orika.pkg.arch.AbstractBaseReadSvc;
 import com.kaseihaku.boot.starter.orika.pkg.arch.AbstractBaseWriteSvc;
 import com.kaseihaku.bpm.app.one.repo.dao.po.MpBasePo;
@@ -25,7 +25,7 @@ import org.apache.ibatis.type.TypeHandler;
  *       所以无法自动处理 {@link com.kaseihaku.core.infra.constant.ClassConstant} 类型的字段，
  *       解决方案一:
  *          给具体的类型定义独立的 {@link TypeHandler}
- *          直接继承 {@link ClassConstantTypeHandler} ，把泛型参数修改为具体类型，并将该 {@link TypeHandler} 配置到 Mybatis 中即可
+ *          直接继承 {@link ClassConstantBaseTypeHandler} ，把泛型参数修改为具体类型，并将该 {@link TypeHandler} 配置到 Mybatis 中即可
  *       解决方案二:
  *          DTO 中使用 XxxClassConstant，PO 中使用 string 替代，
  *          如果 XxxSvcImpl 是继承 {@link AbstractBaseReadSvc} 或 {@link AbstractBaseWriteSvc}
