@@ -29,12 +29,12 @@ grant select on all tables in schema public to k8s_ro; -- @trap 该语句只对�
 -- 当 k8s_rw 在当前 database 创建新对象(表，视图，函数等)时，这些对象会执行哪些权限配置
 ALTER DEFAULT PRIVILEGES FOR ROLE k8s_rw IN SCHEMA public GRANT SELECT ON TABLES TO k8s_ro;
 
-\connect bpm
+\connect bpm_app_one
 \conninfo
-grant all on database bpm to k8s_rw;
+grant all on database bpm_app_one to k8s_rw;
 grant all on schema public to k8s_rw;
 
-grant connect on database bpm to k8s_ro;
+grant connect on database bpm_app_one to k8s_ro;
 grant usage on schema public to k8s_ro;
 grant select on all tables in schema public to k8s_ro;
 ALTER DEFAULT PRIVILEGES FOR ROLE k8s_rw IN SCHEMA public GRANT SELECT ON TABLES TO k8s_ro;

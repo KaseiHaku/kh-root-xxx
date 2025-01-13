@@ -103,7 +103,7 @@ services:
     image: *x-jdk-img
     environment:
       <<: *x-environment
-      SPRING_DATASOURCE_URL: jdbc:postgresql://pgsql-primary:5432/bpm      # 数据库连接 JDBC-URL
+      SPRING_DATASOURCE_URL: jdbc:postgresql://pgsql-primary:5432/bpm_app_one      # 数据库连接 JDBC-URL
       SPRING_DATASOURCE_USERNAME: k8s_rw                                   # 数据库连接 用户名
       SPRING_DATASOURCE_PASSWORD: k8s_rw                                   # 数据库连接 密码
     ports: [ 9100:9100, 5008:5005 ]

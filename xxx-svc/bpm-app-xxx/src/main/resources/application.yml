@@ -60,7 +60,7 @@ spring:
         multiplier: 1.1         # 每次增加的尝试时间间隔是上次的 1.1 倍
         max-interval: 4000      # 最大尝试时间间隔，即：尝试时间间隔上限
   datasource:
-    url: jdbc:postgresql://pgsql-primary:5432/bpm
+    url: jdbc:postgresql://pgsql-primary:5432/bpm_app_one
     username: k8s_rw
     password: k8s_rw
   # 框架默认 redis 是 cluster 模式，开发环境可以设置为 standalone 模式
