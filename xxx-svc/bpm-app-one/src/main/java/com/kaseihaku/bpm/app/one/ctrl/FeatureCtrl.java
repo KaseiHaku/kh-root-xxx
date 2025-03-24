@@ -4,8 +4,8 @@ import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureDto;
 import com.kaseihaku.bpm.app.one.ctrl.dto.FeatureQry;
 import com.kaseihaku.bpm.app.one.svc.FeatureReadSvc;
 import com.kaseihaku.bpm.app.one.svc.FeatureWriteSvc;
-import com.kaseihaku.core.infra.constant.cls.DeletedFlagConstant;
 import com.kaseihaku.core.infra.pojo.Paged;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,9 +25,7 @@ public class FeatureCtrl {
 
     @DeleteMapping("")
     public FeatureDto delete(Long id){
-        FeatureDto featureDto = readSvc.queryById(id).orElseThrow();
-        featureDto.setDeleted(DeletedFlagConstant.deleted);
-        return writeSvc.logicDel(featureDto).orElse(null);
+        return writeSvc.logicDel(id).orElse(null);
     }
 
     @PatchMapping("")
