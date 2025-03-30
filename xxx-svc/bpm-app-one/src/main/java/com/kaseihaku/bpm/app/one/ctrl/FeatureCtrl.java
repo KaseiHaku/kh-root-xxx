@@ -24,8 +24,8 @@ public class FeatureCtrl {
     }
 
     @DeleteMapping("")
-    public FeatureDto delete(Long id){
-        return writeSvc.logicDel(id).orElse(null);
+    public FeatureDto delete(FeatureDto dto){
+        return writeSvc.logicDel(dto).orElse(null);
     }
 
     @PatchMapping("")
